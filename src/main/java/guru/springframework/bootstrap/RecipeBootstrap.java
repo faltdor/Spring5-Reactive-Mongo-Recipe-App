@@ -4,7 +4,12 @@ import guru.springframework.domain.*;
 import guru.springframework.repositories.CategoryRepository;
 import guru.springframework.repositories.RecipeRepository;
 import guru.springframework.repositories.UnitOfMeasureRepository;
+import guru.springframework.repositories.reactive.ICategoryReactiveRepository;
+import guru.springframework.repositories.reactive.IRecipeReactiveRepository;
+import guru.springframework.repositories.reactive.IUnitOfMeasureReactiveRepository;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -25,6 +30,16 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     private final CategoryRepository categoryRepository;
     private final RecipeRepository recipeRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
+    
+    @Autowired
+    IUnitOfMeasureReactiveRepository reactiveRepository;
+    
+    @Autowired
+    ICategoryReactiveRepository categoryReactiveRepository;
+    
+    @Autowired
+    IRecipeReactiveRepository recipeReactiveRepository;
+    
 
     public RecipeBootstrap(CategoryRepository categoryRepository,
                            RecipeRepository recipeRepository, UnitOfMeasureRepository unitOfMeasureRepository) {
@@ -36,10 +51,19 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     @Override
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
+    	
+     	
         loadCategories();
         loadUom();
         recipeRepository.saveAll(getRecipes());
         log.debug("Loading Bootstrap Data");
+        
+        log.error("############## Reactive ##########3333");
+    	log.error(reactiveRepository.count().block().toString());
+    	
+    	log.error(categoryReactiveRepository.count().block().toString());
+    	
+    	log.error(recipeReactiveRepository.count().block().toString());
     }
 
     private void loadCategories(){
